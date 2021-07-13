@@ -1,0 +1,44 @@
+# Active Directory {-}
+
+## Enumerate machines by SAMBA with crackmapexec {-}
+
+**CrackMapExec** (a.k.a **CME**) is a post-exploitation tool that helps automate assessing the security of large Active Directory networks.
+
+```bash
+cme smb 192.168.0.0/24
+```
+
+If we have credentials of a user, and this one have admin priviledges on machines, You can use **CrackMapExec** to check those priviledges.
+If it's the case, you will see a (Pwn3d!) in the result.
+
+```bash
+cme smb 192.168.0.0/24 -u 'user' -p 'password1'
+```
+
+
+## Sniffing traffic for SAMBA Relay with responder {-}
+
+When SAMBA is created, by default SAMBA cert is not signed. That means that by default it's not possible to validate the origin legitimity. 
+In this case Attacker can use tools like responder in order to sniff SAMBA communication traffic.
+
+```bash
+cd /usr/share/responder
+# config file is in Responder.conf
+python3 Responder.py -I eth0 -rdw
+```
+
+As soon as a connection is launched, you can see the communication. And because the SAMBA is not signed you can then get the **Hash Net-NTLMv2** of the user.
+
+```{r, echo = FALSE, fig.cap="Hash Net-NTLMv2 Sniffing", out.width="90%"}
+knitr::include_graphics("images/ad-hashnetntlmv2.png")
+```
+
+What attacker can do with this hash?
+
+1. copy hashes in a file (*hashes*)
+1. bruteforce hashes file with john
+    ```bash
+    john --wordlist=/usr/share/wordlists/rockyou.txt hashes
+    ```
+
+

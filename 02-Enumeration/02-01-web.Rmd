@@ -1,0 +1,103 @@
+# Web Enumeration {-}
+
+## Check if web app is under a WAF {-}
+
+A **WAF** is a type of firewall for web application that filter or block the HTTP trafic. Checking if the web app have a WAF
+is the first thing to check before trying to bruteforce the webapp with fuzzers or specific webapps analyzer like WPScan for example.
+
+```bash
+wafw00f http://<ip_address>
+```
+
+## Nmap http scripting {-}
+
+Nmap have a list of scripts that can be use to enumerate services. In the case of web enumeration, 
+if the port 80 or if http or https are recognize during the server enumeration, attackers can use nmap with the
+http-enum script  
+
+```bash
+nmap --script http-enum -p<port> <ip> -oN webScan
+```
+
+## Whatweb {-}
+
+Whatweb is a tool that allows attackers to know wich kind of technology the web server is using. It's a simple command line tool 
+that can be used as following:
+
+```bash
+whatweb http://<ip>
+```
+
+> [ ! ] Note: don't forget to put http:// or https:// before the ip or the domain name.
+
+## Create a dictionary with the elements in a website {-}
+
+```bash
+cewl -w dictionary.txt http://<ip>
+```
+
+## Fuzzing with WFUZZ {-}
+
+**WFUZZ** is a fuzzing tool that allows attacker to find routes or subdomains of a webapp. this tool needs a dictionary to be used. 
+
+1. Get Method
+
+    ```bash
+    # for directory listing
+    wfuzz -c -t 200 --hc=404 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt http://loalhost.com/FUZZ
+
+    # for fuzzing with extensions
+    wfuzz -c -t 200 --hc=404 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -w extentions.txt http://localhost.com/FUZZ.FUZ2Z
+
+    # for subdomain listing
+    wfuzz -c -t 200 --hc=404 --hw=28,73 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -H "Host: FUZZ.localhost.com http://loalhost.com
+    ```
+    - -c for colorized mode
+    - --hc=404 for omiting routes where response is 404
+    - -t 200 is for giving threads number
+    - --hw for not taking care of word number return
+    - --hh=73 for not taking care of characters with 73 as return number
+
+1. Post Method
+
+    ```bash
+    wfuzz -c --hc=404 -w /opt/Seclists/usernames/top-usernames-shortlist.txt -X POST -d 'user=FUZZ&pass=FUZZ&action=login' http:localhost.htb/action.php
+    ```
+
+## Fuzzing with Dirbuster {-}
+
+**Dirbuster** is a fuzzing tool that allows attacker to find routes or subdomains of a webapp. this tool is a GUI tool. 
+
+
+## Fuzzing with Dirb {-}
+
+**wfuzz** is a fuzzing tool that allows attacker to find routes or subdomains of a webapp. this tool needs a dictionary to be used. 
+
+1. Get Method
+
+    ```bash
+    # for directory listing
+    wfuzz -c -t 200 --hc=404 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt http://loalhost.com/FUZZ
+
+    # for subdomain listing
+    wfuzz -c -t 200 --hc=404 --hw=28,73 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -H "Host: FUZZ.localhost.com http://loalhost.com
+    ```
+    - -c for colorized mode
+    - --hc=404 for omiting routes where response is 404
+    - -t 200 is for giving threads number
+    - --hw for not taking care of word number return
+    - --hh=73 for not taking care of characters with 73 as return number
+
+1. Post Method
+
+    ```bash
+    wfuzz -c --hc=404 -w /opt/Seclists/usernames/top-usernames-shortlist.txt -X POST -d 'user=FUZZ&pass=FUZZ&action=login' http:localhost.htb/action.php
+    ```
+
+## WPScan for wordpress webapps {-}
+
+```bash
+wpscan --help
+
+wpscan --url http://<address> -e vp,u
+```

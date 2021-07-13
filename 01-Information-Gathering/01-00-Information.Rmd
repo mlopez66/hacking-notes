@@ -1,0 +1,51 @@
+# (PART) Information Gathering {-}
+
+# Introduction {-}
+
+Information gathering allows Pentester to widen the attack surface, mount targeted attacks and sharpen attacker tools in preparation for the next phases.
+
+## Social Networks {-}
+
+A good attacker will always start focusing on the weakest link in the security chain, **humans**. That's why checking information from Social networks like Linkdin,
+Twitter, facebook, instagram and so on are very interesting. 
+
+## Public sites {-}
+
+Social networks are not the only public source of information about companies. Other public databases can help attacker to find interesting information about the 
+compagny.
+
+[CrunchBase](https://www.crunchbase.com)
+
+> [ ! ] NOTE: also check government websites to get more information
+
+
+## Whois {-}
+
+**Whois** is a database that works as a command tool that use Domain name information to get Owner name, addresses, emails ant more...
+
+```bash
+whois apple.com
+```
+
+## Check personnal victim website {-}
+
+Attacker will also of course check the client website to find information. They will also use typical corporate email format to check if emails are correct.
+
+
+## Passive Enumeration {-}
+
+Some public tools like **Google** can provide information for subdomains enumeration. In the google bar search if you type `site: company.org`, attackers
+can find subdomains of a webapp.
+This kind of enumeration is called **Passive** because attackers are not communicating directly with the victim but use internet or dns tools to get infos.
+
+1. **Google** with the site: option
+1. **dnsdumpster.com**
+1. **sublist3r** a tool that extends the capabilities of DNS enum
+1. **virustotal.com** in the search tab
+1. **crt.sh** use ssh certificate to find information
+1. Check the ssl certificate of the website can also be interesting to find information
+1. snap install amass,
+    ```bash
+    amass -ip -d google.com
+    ```
+    

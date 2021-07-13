@@ -1,0 +1,11 @@
+# Steganography {-}
+
+## Look at info with file {-}
+
+file image.jpg
+
+steghide image.jpg
+
+exiftool image.jpg
+
+strings image.jpg 

@@ -1,0 +1,123 @@
+# (PART) Enumeration {-}
+
+# Server Enumeration {-}
+
+## Ping for Network connectivity {-}
+
+Ping is a simple tool that allows attackers to know if they can connect to a machine. Ping gives some other informations that can be helpfull.
+
+```bash
+ping -c 1 <ip>
+```
+
+the output looks like following:
+
+```bash
+# ouput
+
+PING 0.0.0.0 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.034 ms
+
+--- 0.0.0.0 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.034/0.034/0.034/0.000 ms
+```
+
+If you see that you have 1 packet transmitted and 1 received, you know that you have an established connection to the server. 
+One relevant information that you can have with the **PING** tool is the ttl because this inoformation allows the attacker to 
+know the operating system of the server:  
+
+- ttl 64 -> Linux
+- ttl 128 -> Windows
+
+Sometimes the number is not exactly 64 or 128 but is near to those numbers. It's because packets are traveling throw other servers 
+before accessing the victim server. If it's the case, you can check the trace route with the following command.
+
+```bash
+ping -c 1 <ip> -R
+
+```
+
+## fping to enumerate multiple unknown machines {-}
+
+**fping** is a tool that extends the capabilities of ping in order to enumerate multiple machines in a network
+
+```bash
+fping -a -g 192.168.1.0/24 2>/dev/null > targets.txt
+```
+
+## NMAP for Machine Enumeration {-}
+
+NMAP is a tool that allows attackers to enumerate the victime machine to understand about wich kind of machine type, services, ports etc he will be confronted.
+
+You can check the open ports of the server with the following command:
+
+```bash
+nmap -p- --open -T5 -v -n <ip>
+```
+
+- The -p- option is to tell nmap to check the all 65535 ports of the server
+- --open is the option to tell nmap to return only the ports that are open
+- -T{1,2,3,4,5} is the option to adjust timing to aggressive mode (1 lowest and 5 biggest aggressivity)
+- -v is for being in a verbose mode (output result as soon as a port is open)
+- -n is for telling nmap to not apply dns resolution
+
+you can check the speed of the scan by pressing multiple time the enter key. If you think that the scan is to slow, you can manage the minimum number of packets should
+send per second. If you use this option, it's no more necessary to use the **-T{1,2,3,4,5}** option
+
+```bash
+nmap -p- -sS --min-rate 5000 --open -vvv -n -Pn <ip> -oG allPorts
+```
+
+- The -sS option tells nmap to do a stealth scan with tcp syn port scan
+- --min-rate 5000 is for telling nmap to send a minimum of 5000 packets per second
+- -vvv is a triple verbose mode to retrieve more information
+- -n to not apply dns resolution
+- -Pn for treat all hosts as online -- skip host discovery
+- -o{A,X,N,G} is to select the output format A for all formats, X for xml, N for the nmpa format and G for Grepeable format
+
+As soon as the attacker knows the ports used by the server, you can tell nmap to run enumeration scripts to those ports
+
+```bash
+nmap -sC -sV -p<ports> <ip> -oN targeted
+```
+
+- -sC stands for activate the Nmap Scripting Engine. -sC performs a script scan using the default set of scripts (it's the same as --script=default) 
+- -sV stands for script of version detection
+
+
+## Use specific or grouped nmap script for Enumeration {-}
+
+first you need to update de system database in order to syncronize every files at system level in a database. That helps tools like
+**locate** to find files in the machine. The files we want to search are the .nse scripts of nmap and look for them categories.
+
+```bash
+updatedb
+locate .nse | wc -l # to check the number of scripts
+locate .nse
+locate .nse | xargs grep "categories"
+locate .nse | xargs grep "categories" | grep -oP '".*?"'
+locate .nse | xargs grep "categories" | grep -oP '".*?"' | sort -u | wc -l
+locate .nse | xargs grep "categories" | grep -oP '".*?"' | sort -u
+#Output
+"auth"
+"broadcast"
+"brute"
+"default"
+"discovery"
+"dos"
+"exploit"
+"external"
+"fuzzer"
+"intrusive"
+"malware"
+"safe"
+"version"
+"vuln"
+```
+
+You can then run nmap with scripts from specific categories.
+
+```bash
+nmap -p445 10.10.10.40 --script "vuln and safe" -oN smbScan
+```

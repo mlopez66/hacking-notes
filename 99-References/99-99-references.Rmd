@@ -1,0 +1,14 @@
+\backmatter
+
+# References {-}
+\markboth{References}{References}
+\noindent
+
+\setlength{\parindent}{-0.20in}
+\setlength{\leftskip}{0.20in}
+\setlength{\parskip}{8pt}
+
+---
+nocite: | 
+  @DeepLGmbH, @Moret2017b
+...

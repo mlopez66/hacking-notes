@@ -1,0 +1,11 @@
+book_filename: "2021-Hacking-Notes"
+delete_merged_file: true
+edit: https://gitlab.epfl.ch/ipese/reports/templates/report/edit/master/%s
+rmd_subdir:
+  - "01-Information-Gathering"
+  - "02-Enumeration"
+  - "03-Vulnerability-Assessment"
+  - "04-Gaining-Access"
+  - "05-Priviledge-Escalation"
+  - "98-appendix"
+  - "99-References"
