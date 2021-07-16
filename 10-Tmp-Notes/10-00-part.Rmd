@@ -123,3 +123,5 @@ which curl
 which wget
 
 wget -qO- <ip>
+
+

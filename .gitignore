@@ -44,5 +44,6 @@ Temporary Items
 
 # Covers JetBrains IDEs
 .idea
-
+hacking-notes.code-workspace
 .Rproj.user
+

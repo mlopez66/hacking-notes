@@ -124,4 +124,3 @@ Here for the notes we will have special nomenclature:
     ```
 
 1. Reverse shell from victim to pivoting machine on 4545 port  
-

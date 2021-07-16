@@ -1,6 +1,6 @@
 # (PART) Information Gathering {-}
 
-# Introduction {-}
+# Get Information from public sources {-}
 
 Information gathering allows Pentester to widen the attack surface, mount targeted attacks and sharpen attacker tools in preparation for the next phases.
 
@@ -48,4 +48,3 @@ This kind of enumeration is called **Passive** because attackers are not communi
     ```bash
     amass -ip -d google.com
     ```
-    

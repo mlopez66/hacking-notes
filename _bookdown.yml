@@ -7,5 +7,3 @@ rmd_subdir:
   - "03-Vulnerability-Assessment"
   - "04-Gaining-Access"
   - "05-Priviledge-Escalation"
-  - "98-appendix"
-  - "99-References"

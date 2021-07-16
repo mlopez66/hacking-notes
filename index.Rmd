@@ -17,9 +17,5 @@ link-citations: yes
 knitr::opts_chunk$set(echo = F)
 ```
 
-```{r echo=F, results='asis', include=identical(knitr:::pandoc_to(), 'html')}
-cat('# Preface {-} \n')
-cat('## Introduction {-} \n')
-```
 ```{r child="00-Preface/00_Resume.Rmd", include=identical(knitr:::pandoc_to(), 'html')}
 ```

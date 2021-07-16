@@ -85,6 +85,25 @@ nmap -sC -sV -p<ports> <ip> -oN targeted
 - -sC stands for activate the Nmap Scripting Engine. -sC performs a script scan using the default set of scripts (it's the same as --script=default) 
 - -sV stands for script of version detection
 
+## Port scanner with bash {-}
+
+```bash
+#!/bin/bash
+
+function ctrl_c(){
+    echo -e "\n[!] exit..."
+    tput cnorm; exit 1
+}
+
+# Ctrl+C
+trap ctrl_c intrusive
+
+tput civis
+for port in $(seq 1 65535); do
+    timeout 1 bash -c "echo '' > /dev/tcp/10.10.10.11/$port" 2>/dev/null && echo "[+] Port $port - OPEN" &
+done; wait
+tput cnorm
+```
 
 ## Use specific or grouped nmap script for Enumeration {-}
 

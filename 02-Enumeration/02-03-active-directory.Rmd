@@ -1,4 +1,27 @@
-# Active Directory {-}
+# Active Directory & Windows Machines {-}
+
+## Interesting Windows ports {-}
+
+- 139 NetBIOS session service
+- 445 Server Message Block **SMB**
+- 1433 ms-sql
+
+> [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers) 
+
+## Map SAMBA exposed shared resources with smbmap {-}
+
+```bash
+smbmap -H 10.10.10.10 -u " " -p " "
+```
+
+## SMB connection with smbclient {-}
+
+```bash
+smbclient //10.10.10.10/<READ ONLY Desired resource>
+```
+
+> [!] NOTE: smbclient don't provide you a shell but a tool. **get filename.txt** allows you to download a resource if you are connected
+
 
 ## Enumerate machines by SAMBA with crackmapexec {-}
 
@@ -40,5 +63,3 @@ What attacker can do with this hash?
     ```bash
     john --wordlist=/usr/share/wordlists/rockyou.txt hashes
     ```
-
-

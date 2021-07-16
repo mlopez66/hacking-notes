@@ -143,4 +143,3 @@ first check the kernel version
 ```bash
 uname -a
 ```
-
