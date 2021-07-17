@@ -1,4 +1,4 @@
-# (PART) Priviledge Escalation {-}
+# (PART) Privilege Escalation {-}
 
 # Linux Machine {-}
 
@@ -9,13 +9,13 @@ To check in which group the user is in the machine:
 id 
 ```
 
-To look at the user priviledges use:
+To look at the user privileges use:
 
 ```bash
 sudo -l
 ```
 
-Next enumerate SSUID priviledges at system level:
+Next enumerate SSUID privileges at system level:
 
 ```bash
 cd /
@@ -59,7 +59,7 @@ ssh -i id_rsa user@<ip> -L 9000:172.17.0.2:9000
 - -i for adding ssh id_rsa key
 - -L for local port forwarding where 9000 correspond to local attacker port and 172.17.0.2:9000 correspond to the address Attacker want to connect using ssh
 
-## Add SSUID priviledge to tool {-}
+## Add SSUID privilege to tool {-}
 
 ```bash
 ls -l /bin/bash
@@ -130,7 +130,7 @@ user2
 
 ## Linux capabilities exploitation {-}
 
-Check in the system if a tool have a special capability that can be used in order to escalate priviledges (**cap_setuid+ep**)
+Check in the system if a tool have a special capability that can be used in order to escalate privileges (**cap_setuid+ep**)
 
 ```bash
 getcap -r / 2>/dev/null

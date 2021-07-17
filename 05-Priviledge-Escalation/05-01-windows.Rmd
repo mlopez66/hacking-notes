@@ -7,7 +7,7 @@
 The goal of this attack is to generate a Ticket Granted Ticket. For this attack you thenneed to recover the hash of the **krbtgt** user that is the one who 
 can create those tickets
 
-## Check possible priviledge escalation vulnerabilities {-}
+## Check possible privilege escalation vulnerabilities {-}
 
 1. check os:
 
@@ -54,7 +54,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
     whoami /priv
     ```
 
-    ```{r, echo = FALSE, fig.cap="impersonate priviledge", out.width="90%"}
+    ```{r, echo = FALSE, fig.cap="impersonate privilege", out.width="90%"}
         knitr::include_graphics("images/juicy-impersonate-priv.png")
     ```
 
@@ -136,3 +136,40 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
         locate psexex.py
         psexec.py WORKGROUP/looping@127.0.0.1 cmd.exe
         ```
+    
+
+## System enumeration with PowerUp for Privesc {-}
+
+**PowerUp** is a script from the PowerSploit Library. PowerSploit is a collection of Microsoft PowerShell modules that can be used to aid penetration 
+testers during all phases of an assessment.
+
+[PowerSploit github](https://github.com/PowerShellMafia/PowerSploit)
+
+1. Open the script
+
+    ```bash
+    cd PowerSploit/Privesc
+    vi PowerUp.ps1
+    ```
+
+1. Set an automatic execution of the desired Alias
+
+    - Write `Invoke-AllChecks` the end of the file
+
+1. Send to the victim machine
+
+1. Check the result
+
+    ```{r, echo = FALSE, fig.cap="PowerUp system enumeration", out.width="90%"}
+        knitr::include_graphics("images/sys-enum-powerup.png")
+    ```
+
+
+In this example we can see that the UsoSvc is a Modifiable Service with an Invoke-ServiceAbuse function.
+
+Feel free now to check for an exploit on [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings).
+Payloads for Windows and Active Directory are listed in the [Methodology and Resource Folder](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+where you can find a **Windows - Privilege Escalation.md**.
+
+Search for UsoSvc to find what to do.
+

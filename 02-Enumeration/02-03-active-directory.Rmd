@@ -1,4 +1,4 @@
-# Active Directory & Windows Machines {-}
+# Active Directory & Windows Manes {-}
 
 ## Interesting Windows ports {-}
 
