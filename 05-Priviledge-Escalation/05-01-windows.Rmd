@@ -43,6 +43,14 @@ can create those tickets
 dir/s *history.txt
 ```
 
+## Check local open ports {-}
+
+```bash
+netstat -nat
+```
+
+Usefull to know if we have to do port forwarding.
+
 ## JuicyPotato {-}
 
 Juicy Potato is a local privilege escalation tool that exploit Windows service accounts impersonation privileges.
@@ -172,4 +180,6 @@ Payloads for Windows and Active Directory are listed in the [Methodology and Res
 where you can find a **Windows - Privilege Escalation.md**.
 
 Search for UsoSvc to find what to do.
+
+
 

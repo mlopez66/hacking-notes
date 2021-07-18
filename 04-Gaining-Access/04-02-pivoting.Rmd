@@ -124,3 +124,13 @@ Here for the notes we will have special nomenclature:
     ```
 
 1. Reverse shell from victim to pivoting machine on 4545 port  
+
+
+## Port forwarding with ssh {-}
+
+```bash
+ssh username@10.10.10.10 -L 1234:127.0.0.1:1234
+```
+
+Explanation of -L is we want a local port forwarding where port 1234 of the victim : will be forwarding to attacker local ip 127.0.0.1 on port 1234.
+

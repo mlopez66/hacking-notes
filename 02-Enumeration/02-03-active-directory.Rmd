@@ -1,12 +1,55 @@
-# Active Directory & Windows Manes {-}
+# Active Directory & Windows Machines {-}
 
 ## Interesting Windows ports {-}
 
+- 88 Kerberos
 - 139 NetBIOS session service
 - 445 Server Message Block **SMB**
+- 389 LDAP
 - 1433 ms-sql
+- 5985-5986 WinRM
 
 > [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers) 
+
+## Active Directory Enumeration {-}
+
+As soon as we see port 88 and 389 or if victime machine changed the port number and we see Kerberos and LDAP, Attacker can estimate that the 
+victim machine is a Domain Controller.
+
+If we already have credentials, we can enumerate the Active Directory with the bloodhound package
+
+1. Install bloodhound injester
+    
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    pip install bloodhound
+    ```
+
+1. Run enumeration
+
+    ```bash
+    bloodhound-python -d victim.local -u username -p "Password" -gc machine.victim.local -c all -ns 10.10.10.11
+    ```
+
+1. New json files have been created in your working directory
+
+    ```bash
+    ls -la *.json
+    ```
+
+1. Install bloodhound and neo4j
+
+    ```bash
+    sudo apt install neo4j bloodhound
+    ```
+
+1. configure neo4j service
+
+    ```bash
+    sudo neo4j console
+    ```
+
 
 ## Map SAMBA exposed shared resources with smbmap {-}
 

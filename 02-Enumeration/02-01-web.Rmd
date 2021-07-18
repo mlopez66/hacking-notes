@@ -101,3 +101,20 @@ wpscan --help
 
 wpscan --url http://<address> -e vp,u
 ```
+
+## Inspect SSL certificate {-}
+
+It's possible to check SSL certificate with the **openssl tool** in order to see if the server is applying virtual hosting.
+
+```bash
+openssl s_client -connect 10.10.10.10:443
+```
+
+## Use curl to retrieve user or information in the webapp {-}
+
+Imagine that a web page have a list of potential users. To create a user file that will help us for bruteforcing with users,
+curl is a perfect tool to do it.
+
+```bash
+curl -s -X GET "http://10.10.10.10/users.php" | grep "user-container" | awk '{print $3}' FS=">" | cut -d '<' -f 1 > users.txt
+```
