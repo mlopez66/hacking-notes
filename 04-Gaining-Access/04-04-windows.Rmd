@@ -77,7 +77,7 @@ If you have user credentials and the machine have port 5985 or WinRM running in 
 with **evil-winrm** tool
 
 1. Install evil-winrm
-
+neo
     ```bash
     sudo gem install evil-winrm
     ```

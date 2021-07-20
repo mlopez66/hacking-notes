@@ -140,3 +140,140 @@ You can then run nmap with scripts from specific categories.
 ```bash
 nmap -p445 10.10.10.40 --script "vuln and safe" -oN smbScan
 ```
+
+## Search for port with udp protocol {-}
+
+Sometimes the standard enumeration that you do with nmap will not give you the entire list of open ports and that can be because
+some ports are open by **udp** and not **tcp**.
+
+You can still use **nmap** to check those ports with the `-sU` argument, but you have to know that the scan will take a while so you can check for a small range of ports or for
+kown services port number that can help the attacker like the 161 for snmp and the port 69 for tftp. 
+
+- Check small range of ports
+
+    ```bash
+    nmap -p 1-1000 --open -T5 -sU -v 10.10.10.10
+    ```
+
+- Check for specific port
+
+    ```bash
+    nmap -p161 --open -T5 -sU -v 10.10.10.10
+    ```
+
+Other tools can help attackers to reach information of services like the snmp one.
+
+### Get snmp community string with onesixtyone {-}
+
+**onesixtyone** is a tool that will make active enumeration of the snmp service by bruteforcing with community strings in order to find the right community string.
+But why is it so interesting to get this famous community string? Because as soon as the attacker knows this community string, he can enumerate internal services and
+privileges information of the machine. 
+
+```bash
+onesixtyone 10.10.10.10
+
+#Output
+
+10.10.10.10 [public]
+```
+
+In this case onesixtyone find that the community string used is the public one.
+By default, onesixtyone only try the two most common community strings that are public and private. But there is more community strings possibilities and
+onesixtyone can use a dictionnary to bruteforce the community strings.
+
+```bash
+onesixtyone -c /opt/SecLists/Discovery/SNMP/common-snmp-community_strings.txt 10.10.10.10
+```
+
+### Enumerate internal services and processes with snmpwalk {-}
+
+**snmpwalk** is an enumeration tool take advantage of snmp vulnerability as soon as the attacker knows the community string.
+The output of snmpwalk is not easy to understand and it's recommended to first install snmp-mibs-downloader.
+
+1. install snmp-mibs-downloader
+
+    ```bash
+    sudo apt install snmp-mibs-downloader
+    ```
+
+1. comment mibs: in snmp.conf to configure snmp-mibs-downloader in order to be used with snmpwalk
+
+    ```bash
+    nano /etc/snmp/snmp.conf
+
+    # mibs:
+    ```
+
+You can now run snmpwalk and use the community string find by **onesixtyone** with the `-c` argument.
+
+```bash
+snmpwalk -c public -v2c 10.10.10.10
+```
+
+### Enumerate internal services and processed with nmap scripts {-}
+
+As you already know **Nmap** have a lot of scripts and some of them are very usefull for enumerating snmp service.
+
+```bash
+locate .nse | grep "snmp"
+```
+
+```{r, echo = FALSE, fig.cap="nmap snmp scripts", out.width="90%"}
+        knitr::include_graphics("images/nmap-snmp-scripts.png")
+```
+
+Interesting scripts are the `snmp-processes` or the `snmp-interfaces`.
+
+```bash
+nmap --script snmp-processes -p161 -sU 10.10.10.10 -v -oN processesSNMP
+nmap --script snmp-interfaces -p161 -sU 10.10.10.10 -v -oN interfaces
+```
+
+
+
+## IPV6 enumeration {-}
+
+### Ping a machine with it's ipv6 address {-}
+
+```bash
+ping -6 -c1 dead:beef::0250:56ff:feb9:dbf3
+```
+
+### Enumerate ports with nmap with the ipv6 address {-}
+
+```bash
+nmap -sS -p- --open --min-rate 5000 -vvv -n -Pn -6 dead:beef::0250:56ff:feb9:dbf3
+```
+
+### Display ipv6 web app on the web browser {-}
+
+In order to display a web app from an ipv6 address you have to put the ipv6 address between brackets: `[dead:beef::250:56ff:feb9:dbf3]`
+
+
+### Pass from MAC address to IPV6 link local address {-}
+
+
+When you find a MAC address, it's possible, following a procedure to convert this address to the IPv6 link-local address.
+
+In the following example we will convert the MAC address 11:22:33:44:55:66
+
+1. Convert the first octet (11) from hexadecimal to binary  
+    - **11**:22:33:44:55:66  
+    - 11 -> 0001 0001  
+1. Invert the 7th bit (if it's 0 put 1, if it's 1 put 0)  
+    - 0001 00**0**1 -> 0001 00**1**1  
+1. Convert the octet back into hexadecimal  
+    - 0001 -> 1  
+    - 0011 -> 3  
+    - **0001 0011 -> 13**  
+1. Replace the original first octet with the newly converted one  
+    - **11**:22:33:44:55:66 -> **13**:22:33:44:55:66  
+1. Add **ff:fe** to the middle of the new MAC address  
+    - 13:22:33:**ff:fe**:44:55:66  
+1. Add **dead:beef::** to the beginning of the address  
+    - **dead:beef::**13:22:33:ff:fe:44:55:66  
+1. group everything by 4 hex digits  
+    - dead:beef::1322:33ff:fe44:5566
+
+> [!] Note: In some documentation they talk about putting **fe80::** instead of **dead:beef::** but seams to be the same.
+

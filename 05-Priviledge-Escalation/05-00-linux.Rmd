@@ -9,6 +9,8 @@ To check in which group the user is in the machine:
 id 
 ```
 
+> [!] NOTE: Checking groups can be interesting because sometimes groups are not related to the machine but related to tools like Docker, lxd or other.
+
 To look at the user privileges use:
 
 ```bash
