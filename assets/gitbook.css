@@ -129,8 +129,19 @@ p.caption {
   blockquote > p:first-child {
     text-align: inherit;
   }
+
+  code span.fu {
+    color:#00ffff;
+  }
   
+  code span.va {
+    color: #716fd6;
+  }
   
+  code span.dt {
+    color: #eb5b33;
+}
+
   /* Footer */
   .copyright {
     font-style: italic;

