@@ -44,6 +44,12 @@ mkdir /mnt/smbvictim
 mount -t cifs "//10.10.10.10/<Accessible resource>" /mnt/smbvictim
 ```
 
+You can also mount a directory with user credentials in order to get more information
+
+```bash
+mount -o user=<username> -t cifs //10.10.10.10/<folder> /mnt/smbvictim/
+```
+
 > [!] NOTE: A mounted partition is not a download of victim folders and file. That's only an access pass. Type `unmount /mnt/smbmounted` to close the
 > mounted share.
 
