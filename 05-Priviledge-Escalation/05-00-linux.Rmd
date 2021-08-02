@@ -52,6 +52,34 @@ You can then copy the hash in passwd for the root user
 root:JIJQueSBU9kBY:0:0:root:/root:/usr/bin/zsh
 ```
 
+## Monitoring processes using bash {-}
+
+```bash
+#!/bin/bash
+
+old_process=$(ps -eo command)
+
+while true; do
+    new_process=$(ps -eo command)
+    diff <(echo "$old_process") <(echo "$new_process") | grep "[\>\<]" | grep -v -E "procmon|ps|command"
+    old_process=$new_process
+done
+```
+
+## Monitoring processes using pspy {-}
+
+**pspy** is a utility written in GO that allows attackers to monitorize background processes.
+
+```bash
+git clone https://github.com/DominicBreuker/pspy
+cd pspy
+go build -ldflags "-s -w" .
+upx brute pspy 
+```
+
+You can send the pspy compiled file to the victim machnie using `python3 -m http.server` and run it with `.\pspy` after giving pspy execution 
+rights.
+
 ## Local Port forwarding {-}
 
 ```bash

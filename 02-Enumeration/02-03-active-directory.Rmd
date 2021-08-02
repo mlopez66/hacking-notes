@@ -75,9 +75,24 @@ cd /mnt/smbvictim/Users
 ls -l | awk 'NF{print $NF}' | while read directory; do echo -e "\n[+] Directory $directory; smbcacls "10.10.10.10/<Accessible resource>" Users/$directory -N | grep -i everyone ; done
 ```
 
-If you find a directory that have writable rights, something that can be intersting to check is that if you create a file in it, is somebody 
+If you find a directory that have writable rights, something that can be intersting to check is that if you create a file in it, is somebody
 manipulating it (remove it, writing on it, removing his content etc.). If it's the case, attacker have a way of stolling the hash NTLMv2 with
 malicious **scf** file
+
+## Get all files in a smb directory with smbget {-}
+
+Using the mounted option is interessting, but sometimes attacker will find more convenient to download all the shared files in the attacker machine.
+For this purpose, you can use the **smbget** utility.
+
+```bash
+smbget -R smb://10.10.10.10/<Accessible resource> -U username
+```
+
+Also possible for a specific folder inside the resource
+
+```bash
+smbget -rR smb://10.10.10.10/<Accessible resource>/directoryA/directoryB -U username
+```
 
 ## Enumerate machines and check user validity by SAMBA with CME {-}
 
@@ -93,8 +108,8 @@ cme smb 192.168.0.0/24
 cme smb 10.10.10.10
 ```
 
-If we have credentials of a user, you can use **CME** to check the validity of a user. If the user with the password exists, the tool will 
-write a red plus sign, if not, a minus sign. And if the user exists and this one have admin priviledges on machines, **CrackMapExec** will 
+If we have credentials of a user, you can use **CME** to check the validity of a user. If the user with the password exists, the tool will
+write a red plus sign, if not, a minus sign. And if the user exists and this one have admin priviledges on machines, **CrackMapExec** will
 return a red plus sign and you will see a (Pwn3d!) in the result.
 
 ```bash
@@ -105,6 +120,12 @@ You can also check the validity of multiple users with some discovered passwords
 
 ```bash
 cme smb 10.10.10.10 -u users.txt -p passwords.txt
+```
+
+Here, something that can be interesting is to list the shared recourses for this user
+
+```bash
+cme smb 10.10.10.10 -u 'user' -p 'password1' --shares
 ```
 
 ## Sniffing traffic for SAMBA Relay with responder {-}
