@@ -52,6 +52,16 @@ You can then copy the hash in passwd for the root user
 root:JIJQueSBU9kBY:0:0:root:/root:/usr/bin/zsh
 ```
 
+## Check crons on machine {-}
+
+```bash
+cat /etc/cron
+crontab -l
+ls /var/spool/cron/
+ls /var/spool/cron/ -l
+systemctl list-timers
+```
+
 ## Monitoring processes using bash {-}
 
 ```bash

