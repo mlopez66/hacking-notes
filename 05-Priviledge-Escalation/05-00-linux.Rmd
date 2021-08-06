@@ -90,6 +90,26 @@ upx brute pspy
 You can send the pspy compiled file to the victim machnie using `python3 -m http.server` and run it with `.\pspy` after giving pspy execution 
 rights.
 
+## Check for GIT repositories {-}
+
+```bash
+find \-type f 2>/dev/null | grep ".git"
+```
+
+Some times, you will be able to see folders that contains a `.git` folder in it. That means that this folder is a repository git.
+**GIT** is not a vunlerability if facts but as they save all the history of de files changes, as an attacker we can enumerate and
+see if developpers have made mistakes.
+
+```bash
+git log
+```
+
+With the parameter `-p` you can look at the differences made in a specific commit.
+
+```bash
+git log -p 33e87c312c08735a02fa9c796021a4a3023129ad
+```
+
 ## Local Port forwarding {-}
 
 ```bash

