@@ -11,6 +11,7 @@
 
 > [!] NOTE: NetBIOS session service facilitates authentication aross a windows workgroup or domain and provides access to resources (such as files and printers)
 
+
 ## SMB connection with smbclient and smbmap {-}
 
 **smbclient** is a tool that allows attacker to enumerate and list the shared resources of a machine that have the smb service on. 
@@ -92,6 +93,12 @@ Also possible for a specific folder inside the resource
 
 ```bash
 smbget -rR smb://10.10.10.10/<Accessible resource>/directoryA/directoryB -U username
+```
+
+## Search for specific file with smbmap {-}
+
+```bash
+smbmap -R <Accessible resource> -H 10.10.10.10 -A Groups.xml -q 
 ```
 
 ## Enumerate machines and check user validity by SAMBA with CME {-}
@@ -192,3 +199,22 @@ locate .nse | grep "ldap"
 ```bash
 nmap --script ldap\* 10.10.10.10 -oN ldapScan
 ```
+
+## LDAP Port Get Domain objects with windapsearch {-}
+
+```bash
+git clone https://github.com/ropnop/windapsearch.git
+pip install python-ldap #or apt-get install python-ldap
+./windapsearch.py -d DOMAIN --dc-ip 10.10.10.10 -U
+```
+
+## LDAP enum with GetADUsers.py {-}
+
+```bash
+impacket-GetADUsers DOMAIN/ -dc-ip 10.10.10.10 -debug
+```
+
+
+
+
+
