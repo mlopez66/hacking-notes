@@ -190,6 +190,17 @@ rpcclient -U "user%password" 10.10.10.10 -c 'querygroupmem 0x200'
 rpcclient -U "user%password" 10.10.10.10 -c 'queryuser 0x1f4'
 ```
 
+We can also prepare a list of users for a possible Asproasting Attack.
+
+```bash
+cd content
+rpcclient -U "" 10.10.10.161 -N -c "enumdomusers" 
+rpcclient -U "" 10.10.10.161 -N -c "enumdomusers" | grep -oP '\[.*?\]' 
+rpcclient -U "" 10.10.10.161 -N -c "enumdomusers" | grep -oP '\[.*?\]' | grep "0x" -v 
+rpcclient -U "" 10.10.10.161 -N -c "enumdomusers" | grep -oP '\[.*?\]' | grep "0x" -v | tr -d '[]'
+rpcclient -U "" 10.10.10.161 -N -c "enumdomusers" | grep -oP '\[.*?\]' | grep "0x" -v | tr -d '[]' > users.txt
+```
+
 ## Enumerate ldap service with nmap {-}
 
 ```bash
