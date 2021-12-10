@@ -2,6 +2,7 @@
 
 ## Interesting Windows ports {-}
 
+- 53 DNS
 - 88 Kerberos
 - 139 NetBIOS session service
 - 445 Server Message Block **SMB**
