@@ -110,6 +110,37 @@ With the parameter `-p` you can look at the differences made in a specific commi
 git log -p 33e87c312c08735a02fa9c796021a4a3023129ad
 ```
 
+## Checking Machine local open ports {-}
+
+```bash
+cat /proc/net/tcp
+#Output
+
+sl  local_address ...
+0:  00000000:01BB
+1:  0100007F:1F40
+2:  0100007F:2BCB
+```
+
+you can now use python to check the corresponding ports in hexadecimal
+
+```bash
+python3
+
+>>> 0x01BB
+443
+>>> 0x1F40
+8000
+>>> 0x2BCB
+11211
+>>> 0x0050
+80
+>>> 0x0015
+21
+>>> 0x0016
+22
+```
+
 ## Local Port forwarding {-}
 
 ```bash

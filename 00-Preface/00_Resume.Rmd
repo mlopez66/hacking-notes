@@ -5,7 +5,7 @@
 This is my notebook while following some Hacking Ethical lectures, Writups, hacking channels and of course my own research during CTF's hacking.
 This notebook contains almost everything I have been confronted with and will finally a never ending. 
 
-## Acknoledgement {-}
+## H4cknowledgement {-}
 
 By the way, I would like to thanks S4vitar for his helpful course on Mastermind and also his content on Twitch and Youtube.
 I would like also to thanks INE.com for it's professional content.
