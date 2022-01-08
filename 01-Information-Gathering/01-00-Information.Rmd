@@ -27,7 +27,7 @@ compagny.
 whois apple.com
 ```
 
-## Check personnal victim website {-}
+## Check victim website {-}
 
 Attacker will also of course check the client website to find information. They will also use typical corporate email format to check if emails are correct.
 
